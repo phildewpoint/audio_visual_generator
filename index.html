@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Procedural Audiovisual Synthesis Engine</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app-container">
+    <!-- Main Interactive Canvas -->
+    <canvas id="viewport-canvas"></canvas>
+
+    <!-- Retro CRT / Bloom Scanline Layer -->
+    <div class="crt-overlay"></div>
+
+    <!-- Start / Audio Consent Overlay -->
+    <div id="audio-prompt-modal">
+      <div class="modal-card">
+        <h1 class="modal-title">COSMIC RESONANCE</h1>
+        <p class="modal-desc">
+          A real-time procedural audiovisual instrument generated with <strong>zero external assets</strong>.
+          Sound synthesizers and visual landscapes generated programmatically in real time via Web Audio API, HTML5 Canvas, and WebGL.
+        </p>
+        <button id="btn-start-modal" class="btn-start-experience">
+          <span>⚡</span> ENTER EXPERIENCE & START AUDIO
+        </button>
+      </div>
+    </div>
+
+    <!-- Floating Sleek Glassmorphism HUD -->
+    <aside id="floating-gui" aria-label="Controls Panel">
+      <!-- Header -->
+      <div class="panel-header">
+        <div class="brand-badge">
+          <div class="brand-dot"></div>
+          <span class="brand-title">Procedural AV</span>
+        </div>
+        <div class="header-actions">
+          <button id="btn-fullscreen" class="icon-btn" title="Toggle Fullscreen">⛶</button>
+          <button id="btn-collapse-gui" class="icon-btn" title="Collapse / Expand Panel">
+            <span>◧</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable Body -->
+      <div class="panel-body">
+        <!-- Visual Engines Switcher -->
+        <section class="control-section">
+          <div class="section-label">
+            <span>Visual Engine</span>
+          </div>
+          <div class="engine-switcher">
+            <button class="engine-btn" data-engine="ascii">ASCII Art</button>
+            <button class="engine-btn" data-engine="impressionist">Impressionist</button>
+            <button class="engine-btn" data-engine="stained_glass">Stained Glass</button>
+            <button class="engine-btn active" data-engine="synthwave">Synthwave 3D</button>
+          </div>
+        </section>
+
+        <!-- Visual Parameters -->
+        <section class="control-section">
+          <div class="section-label">
+            <span>Visual Dynamics</span>
+          </div>
+          
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Animation Speed</span>
+              <span id="val-speed" class="slider-val">1.00x</span>
+            </div>
+            <input type="range" id="slider-speed" min="0.1" max="3.0" step="0.05" value="1.0">
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Particle / Cell Density</span>
+              <span id="val-density" class="slider-val">1.00x</span>
+            </div>
+            <input type="range" id="slider-density" min="0.5" max="2.0" step="0.05" value="1.0">
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Palette Hue Shift</span>
+              <span id="val-palette" class="slider-val">0°</span>
+            </div>
+            <input type="range" id="slider-palette" min="0" max="360" step="1" value="0">
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Chaos / Turbulence</span>
+              <span id="val-chaos" class="slider-val">1.00</span>
+            </div>
+            <input type="range" id="slider-chaos" min="0.2" max="2.5" step="0.05" value="1.0">
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+            <label for="toggle-crt" style="cursor: pointer;">CRT Scanline Filter</label>
+            <input type="checkbox" id="toggle-crt" checked style="cursor: pointer; accent-color: var(--accent-cyan);">
+          </div>
+        </section>
+
+        <!-- Procedural Audio Workstation -->
+        <section class="control-section">
+          <div class="section-label">
+            <span>Audio Workstation</span>
+            <span style="display: flex; align-items: center; gap: 4px; font-size: 10px; text-transform: none; color: var(--text-muted);">
+              <input type="checkbox" id="toggle-auto-evolve" checked style="accent-color: var(--accent-cyan); cursor: pointer;">
+              <label for="toggle-auto-evolve" style="cursor: pointer;">Auto-Evolve</label>
+            </span>
+          </div>
+
+          <button id="btn-audio-toggle" class="action-btn primary" style="padding: 10px;">
+            🔈 Start Sound
+          </button>
+
+          <!-- Generative Journey & Evolution Tracker -->
+          <div class="journey-tracker-card" title="Algorithmic Arrangement & Evolution State Machine">
+            <div class="journey-card-header">
+              <span class="journey-title">Generative Journey</span>
+              <span id="journey-phase-badge" class="phase-badge phase-groove">GROOVE</span>
+            </div>
+            <div class="journey-flow-row">
+              <div class="journey-concept-box current">
+                <span class="journey-sublabel">NOW PLAYING</span>
+                <span id="journey-current-badge" class="journey-concept-name">🌌 Cosmic Ambient</span>
+              </div>
+              <div class="journey-flow-arrow">➔</div>
+              <div class="journey-concept-box next">
+                <span class="journey-sublabel">APPROACHING</span>
+                <span id="journey-next-indicator" class="journey-concept-name">🏎️ Driving Outrun</span>
+              </div>
+            </div>
+            <div class="journey-progress-wrap">
+              <div class="journey-progress-header">
+                <span id="journey-progress-text">Bar 1 / 16 (Groove)</span>
+                <span id="journey-countdown-text">15 bars to drop</span>
+              </div>
+              <div class="journey-progress-track">
+                <div id="journey-progress-bar" class="journey-progress-bar" style="width: 6%;"></div>
+              </div>
+            </div>
+            <div class="journey-duration-row">
+              <span>Evolution Cycle:</span>
+              <select id="select-evolve-duration" class="journey-duration-select">
+                <option value="8">8 Bars (Fast Switch)</option>
+                <option value="16" selected>16 Bars (Balanced Evolution)</option>
+                <option value="24">24 Bars (Deep Progression)</option>
+                <option value="32">32 Bars (Symphonic Score)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="audio-scope-container" title="Real-Time Audio Oscilloscope & Spectrum">
+            <canvas id="mini-scope-canvas" width="326" height="46"></canvas>
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Tempo</span>
+              <span id="val-bpm" class="slider-val">78 BPM</span>
+            </div>
+            <input type="range" id="slider-bpm" min="60" max="140" step="1" value="78">
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-header">
+              <span>Cinematic Scale</span>
+            </div>
+            <select id="select-scale">
+              <option value="lydian_cosmic">Lydian Cosmic (Sci-Fi Wonder)</option>
+              <option value="dorian_deep">Dorian Deep (Atmospheric Moody)</option>
+              <option value="aeolian_cinematic">Aeolian Cinematic (Emotional Score)</option>
+              <option value="pentatonic_ethereal">Pentatonic Ethereal (Serene Space)</option>
+              <option value="mystic_insen">Mystic Insen (Eastern Meditative)</option>
+            </select>
+          </div>
+
+          <!-- Instant Mood Shifts -->
+          <div class="section-label" style="margin-top: 6px;">
+            <span>Instant Mood Shifts</span>
+          </div>
+          <div class="mood-macro-grid">
+            <button class="mood-badge" data-mood="cosmic_ambient" title="Space Ambient (Ambient Pulse, Drone, Swells, Chimes)">🌌 Cosmic</button>
+            <button class="mood-badge" data-mood="driving_outrun" title="Outrun / Synthwave (4-on-Floor, Rolling 16th, Stabs, Arp)">🏎️ Outrun</button>
+            <button class="mood-badge" data-mood="cinematic_tension" title="Film Score (Halftime, Sub Drone, Wide Swell, Slow Glide)">🎬 Cinematic</button>
+            <button class="mood-badge" data-mood="zen_meditation" title="Meditation (Heartbeat, Drone, Infinite Pad, Serene Chimes)">🧘 Zen</button>
+            <button class="mood-badge" data-mood="glitch_cyber" title="Cyberpunk IDM (Glitch Drums, Acid Walk, Insen Scale)">⚡ Cyber</button>
+          </div>
+
+          <!-- 4-Channel Mixer Deck -->
+          <div class="section-label" style="margin-top: 6px;">
+            <span>Multi-Part Mixer</span>
+          </div>
+
+          <div class="mixer-deck">
+            <!-- Drums Strip -->
+            <div class="channel-strip" id="strip-drums">
+              <div class="strip-header">
+                <span class="strip-name">Drums</span>
+                <span class="track-led" id="led-drums"></span>
+              </div>
+              <div class="strip-btn-row">
+                <button class="strip-btn btn-mute" data-track="drums" title="Mute Drums">M</button>
+                <button class="strip-btn btn-solo" data-track="drums" title="Solo Drums">S</button>
+              </div>
+              <div class="strip-slider-container">
+                <input type="range" class="strip-slider" id="vol-drums" min="0" max="1" step="0.02" value="0.8">
+                <span class="strip-vol-label" id="val-vol-drums">80%</span>
+              </div>
+              <button class="btn-mutate" data-track="drums" title="Mutate drum rhythm">🎲 Mutate</button>
+            </div>
+
+            <!-- Bass Strip -->
+            <div class="channel-strip" id="strip-bass">
+              <div class="strip-header">
+                <span class="strip-name">Bass</span>
+                <span class="track-led" id="led-bass"></span>
+              </div>
+              <div class="strip-btn-row">
+                <button class="strip-btn btn-mute" data-track="bass" title="Mute Bass">M</button>
+                <button class="strip-btn btn-solo" data-track="bass" title="Solo Bass">S</button>
+              </div>
+              <div class="strip-slider-container">
+                <input type="range" class="strip-slider" id="vol-bass" min="0" max="1" step="0.02" value="0.85">
+                <span class="strip-vol-label" id="val-vol-bass">85%</span>
+              </div>
+              <button class="btn-mutate" data-track="bass" title="Mutate bass groove">🎲 Mutate</button>
+            </div>
+
+            <!-- Pads Strip -->
+            <div class="channel-strip" id="strip-pads">
+              <div class="strip-header">
+                <span class="strip-name">Pads</span>
+                <span class="track-led" id="led-pads"></span>
+              </div>
+              <div class="strip-btn-row">
+                <button class="strip-btn btn-mute" data-track="pads" title="Mute Pads">M</button>
+                <button class="strip-btn btn-solo" data-track="pads" title="Solo Pads">S</button>
+              </div>
+              <div class="strip-slider-container">
+                <input type="range" class="strip-slider" id="vol-pads" min="0" max="1" step="0.02" value="0.75">
+                <span class="strip-vol-label" id="val-vol-pads">75%</span>
+              </div>
+              <button class="btn-mutate" data-track="pads" title="Mutate chord progression">🎲 Mutate</button>
+            </div>
+
+            <!-- Lead Strip -->
+            <div class="channel-strip" id="strip-lead">
+              <div class="strip-header">
+                <span class="strip-name">Lead</span>
+                <span class="track-led" id="led-lead"></span>
+              </div>
+              <div class="strip-btn-row">
+                <button class="strip-btn btn-mute" data-track="lead" title="Mute Lead">M</button>
+                <button class="strip-btn btn-solo" data-track="lead" title="Solo Lead">S</button>
+              </div>
+              <div class="strip-slider-container">
+                <input type="range" class="strip-slider" id="vol-lead" min="0" max="1" step="0.02" value="0.7">
+                <span class="strip-vol-label" id="val-vol-lead">70%</span>
+              </div>
+              <button class="btn-mutate" data-track="lead" title="Mutate melody">🎲 Mutate</button>
+            </div>
+          </div>
+
+          <!-- 16-Step Beat Tracker -->
+          <div class="step-tracker-container" title="16-Step Sequencer Playhead">
+            <div class="step-dots" id="step-dots-row">
+              <span class="step-dot" data-step="0"></span>
+              <span class="step-dot" data-step="1"></span>
+              <span class="step-dot" data-step="2"></span>
+              <span class="step-dot" data-step="3"></span>
+              <span class="step-dot" data-step="4"></span>
+              <span class="step-dot" data-step="5"></span>
+              <span class="step-dot" data-step="6"></span>
+              <span class="step-dot" data-step="7"></span>
+              <span class="step-dot" data-step="8"></span>
+              <span class="step-dot" data-step="9"></span>
+              <span class="step-dot" data-step="10"></span>
+              <span class="step-dot" data-step="11"></span>
+              <span class="step-dot" data-step="12"></span>
+              <span class="step-dot" data-step="13"></span>
+              <span class="step-dot" data-step="14"></span>
+              <span class="step-dot" data-step="15"></span>
+            </div>
+          </div>
+
+          <!-- Sound Design Inspector -->
+          <div class="inspector-card">
+            <div class="inspector-header">
+              <span class="inspector-title">Sound Design Inspector</span>
+              <span id="inspector-active-badge" class="inspector-badge">DRUMS</span>
+            </div>
+
+            <div class="inspector-tabs">
+              <button class="tab-btn active" data-tab="drums">🥁 Drums</button>
+              <button class="tab-btn" data-tab="bass">🎸 Bass</button>
+              <button class="tab-btn" data-tab="pads">🎹 Pads</button>
+              <button class="tab-btn" data-tab="lead">✨ Lead</button>
+            </div>
+
+            <div class="inspector-panes">
+              <!-- DRUMS PANE -->
+              <div class="inspector-pane active" id="pane-drums">
+                <div class="param-row">
+                  <span class="param-label">Groove Style</span>
+                  <select id="select-drums-style" class="inspector-select">
+                    <option value="ambient_pulse">Ambient Pulse (Deep Atmospheric)</option>
+                    <option value="four_on_floor">Four-on-the-Floor (Club / Synthwave)</option>
+                    <option value="halftime_cinematic">Halftime Cinematic (Heavy Beat 3)</option>
+                    <option value="glitch_idm">Glitch IDM (Euclidean Polyrhythms)</option>
+                    <option value="minimal_heartbeat">Minimal Heartbeat (Sparse Thump)</option>
+                    <option value="breakbeat_cyber">Breakbeat Cyber (Syncopated Break)</option>
+                  </select>
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Pattern Density</span>
+                    <span id="val-drums-density" class="slider-val">1.0x</span>
+                  </div>
+                  <input type="range" id="slider-drums-density" min="0.5" max="2.0" step="0.1" value="1.0">
+                </div>
+
+                <div class="param-row-checkbox">
+                  <label for="check-drums-punchy" style="cursor: pointer;">Punchy Transient Attack</label>
+                  <input type="checkbox" id="check-drums-punchy" style="cursor: pointer; accent-color: var(--accent-cyan);">
+                </div>
+
+                <!-- Per-Track Effects: Drive & Sends -->
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Drive / Saturation</span>
+                    <span id="val-drums-drive" class="slider-val">0%</span>
+                  </div>
+                  <input type="range" id="slider-drums-drive" min="0" max="1" step="0.02" value="0.0">
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Reverb Send</span>
+                    <span id="val-drums-reverb" class="slider-val">25%</span>
+                  </div>
+                  <input type="range" id="slider-drums-reverb" min="0" max="1" step="0.05" value="0.25">
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Chorus Send</span>
+                    <span id="val-drums-chorus" class="slider-val">0%</span>
+                  </div>
+                  <input type="range" id="slider-drums-chorus" min="0" max="1" step="0.05" value="0.0">
+                </div>
+              </div>
+
+              <!-- BASS PANE -->
+              <div class="inspector-pane" id="pane-bass">
+                <div class="param-row">
+                  <span class="param-label">Bassline Groove</span>
+                  <select id="select-bass-style" class="inspector-select">
+                    <option value="cinematic_drone">Cinematic Drone (Sustained Ground)</option>
+                    <option value="rolling_16th">Rolling 16th (Driving Synthwave)</option>
+                    <option value="syncopated_pulse">Syncopated Pulse (Offbeat Funk)</option>
+                    <option value="octave_bounce">Octave Bounce (Outrun Disco)</option>
+                    <option value="acid_walk">Acid Walk (Melodic Scale Degrees)</option>
+                  </select>
+                </div>
+
+                <div class="param-row">
+                  <span class="param-label">Register Octave</span>
+                  <select id="select-bass-octave" class="inspector-select">
+                    <option value="-1">Sub Low (-1 Octave)</option>
+                    <option value="0" selected>Standard Sub (0)</option>
+                    <option value="1">Punchy Mid (+1 Octave)</option>
+                  </select>
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Filter Cutoff (Tone)</span>
+                    <span id="val-bass-tone" class="slider-val">420 Hz</span>
+                  </div>
+                  <input type="range" id="slider-bass-tone" min="120" max="1400" step="20" value="420">
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Filter Resonance (Q)</span>
+                    <span id="val-bass-res" class="slider-val">3.5</span>
+                  </div>
+                  <input type="range" id="slider-bass-res" min="0.5" max="8.0" step="0.2" value="3.5">
+                </div>
+
+                <!-- Per-Track Effects: Drive & Sends -->
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Drive / Saturation</span>
+                    <span id="val-bass-drive" class="slider-val">0%</span>
+                  </div>
+                  <input type="range" id="slider-bass-drive" min="0" max="1" step="0.02" value="0.0">
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Chorus Send</span>
+                    <span id="val-bass-chorus" class="slider-val">0%</span>
+                  </div>
+                  <input type="range" id="slider-bass-chorus" min="0" max="1" step="0.05" value="0.0">
+                </div>
+              </div>
+
+              <!-- PADS PANE -->
+              <div class="inspector-pane" id="pane-pads">
+                <div class="param-row">
+                  <span class="param-label">Envelope Style</span>
+                  <select id="select-pads-style" class="inspector-select">
+                    <option value="ambient_swell">Ambient Swell (2-Bar Swells)</option>
+                    <option value="infinite_drone">Infinite Drone (Continuous Atmosphere)</option>
+                    <option value="rhythmic_stabs">Rhythmic Stabs (Gated 8ths)</option>
+                    <option value="arpeggiated_chord">Arpeggiated Pulses (16th Waves)</option>
+                  </select>
+                </div>
+
+                <div class="param-row">
+                  <span class="param-label">Chord Voicing Spread</span>
+                  <select id="select-pads-voicing" class="inspector-select">
+                    <option value="wide_cinematic">Wide Cinematic (Open 2-Octave)</option>
+                    <option value="warm_triads">Warm Triads (Mid Register)</option>
+                    <option value="shimmer_extensions">Shimmer Extensions (7th / 9th / #11)</option>
+                    <option value="suspended_space">Suspended Space (Sus2 / Sus4 Clusters)</option>
+                  </select>
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Filter Brightness</span>
+                    <span id="val-pads-bright" class="slider-val">2400 Hz</span>
+                  </div>
+                  <input type="range" id="slider-pads-bright" min="600" max="5500" step="100" value="2400">
+                </div>
+
+                <!-- Per-Track Effects: Drive & Sends -->
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Drive / Saturation</span>
+                    <span id="val-pads-drive" class="slider-val">0%</span>
+                  </div>
+                  <input type="range" id="slider-pads-drive" min="0" max="1" step="0.02" value="0.0">
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Reverb Send</span>
+                    <span id="val-pads-reverb" class="slider-val">65%</span>
+                  </div>
+                  <input type="range" id="slider-pads-reverb" min="0" max="1" step="0.05" value="0.65">
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Delay Send</span>
+                    <span id="val-pads-delay" class="slider-val">20%</span>
+                  </div>
+                  <input type="range" id="slider-pads-delay" min="0" max="1" step="0.05" value="0.20">
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Chorus Send</span>
+                    <span id="val-pads-chorus" class="slider-val">30%</span>
+                  </div>
+                  <input type="range" id="slider-pads-chorus" min="0" max="1" step="0.05" value="0.30">
+                </div>
+              </div>
+
+              <!-- LEAD PANE -->
+              <div class="inspector-pane" id="pane-lead">
+                <div class="param-row">
+                  <span class="param-label">Melodic Phrasing</span>
+                  <select id="select-lead-style" class="inspector-select">
+                    <option value="celestial_chimes">Celestial Chimes (Stochastic Drops)</option>
+                    <option value="driving_arpeggio">Driving Arpeggio (Rapid 16ths)</option>
+                    <option value="call_and_response">Call & Response (Phrased Melody)</option>
+                    <option value="slow_glide">Slow Glide (Lyrical Portamento)</option>
+                    <option value="pentatonic_solo">Pentatonic Solo (Ethereal Riffs)</option>
+                  </select>
+                </div>
+
+                <div class="param-row">
+                  <span class="param-label">Oscillator Waveform</span>
+                  <select id="select-lead-waveform" class="inspector-select">
+                    <option value="triangle" selected>Triangle (Pure Crystalline)</option>
+                    <option value="sawtooth">Sawtooth (Synthwave Blade)</option>
+                    <option value="square">Square (Chiptune 8-Bit)</option>
+                    <option value="sine">Sine (Soft Ambient Flute)</option>
+                  </select>
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Melodic Density</span>
+                    <span id="val-lead-density" class="slider-val">1.0x</span>
+                  </div>
+                  <input type="range" id="slider-lead-density" min="0.4" max="2.0" step="0.1" value="1.0">
+                </div>
+
+                <!-- Per-Track Effects: Drive & Sends -->
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Drive / Saturation</span>
+                    <span id="val-lead-drive" class="slider-val">0%</span>
+                  </div>
+                  <input type="range" id="slider-lead-drive" min="0" max="1" step="0.02" value="0.0">
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Delay Ping-Pong Send</span>
+                    <span id="val-lead-delay" class="slider-val">55%</span>
+                  </div>
+                  <input type="range" id="slider-lead-delay" min="0" max="1" step="0.05" value="0.55">
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Reverb Send</span>
+                    <span id="val-lead-reverb" class="slider-val">40%</span>
+                  </div>
+                  <input type="range" id="slider-lead-reverb" min="0" max="1" step="0.05" value="0.40">
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-header">
+                    <span>Chorus Send</span>
+                    <span id="val-lead-chorus" class="slider-val">25%</span>
+                  </div>
+                  <input type="range" id="slider-lead-chorus" min="0" max="1" step="0.05" value="0.25">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Master FX Rack (Split Track vs Master Architecture) -->
+          <div class="master-fx-card">
+            <div class="master-fx-header">
+              <div class="fx-header-left">
+                <span class="master-fx-title">🎛️ Master FX Rack</span>
+                <span class="fx-pill">GLOBAL BUS</span>
+              </div>
+              <label class="fx-auto-label" title="Auto-modulate master filter sweeps & delay feedback during arrangement shifts">
+                <input type="checkbox" id="check-auto-evolve-fx" checked style="accent-color: var(--accent-cyan); cursor: pointer;">
+                <span>Auto-Evolve FX</span>
+              </label>
+            </div>
+
+            <!-- Master DJ Resonant Filter -->
+            <div class="fx-module">
+              <div class="fx-module-header">
+                <span class="fx-module-name">DJ Master Filter</span>
+                <select id="select-master-filter-type" class="fx-select-mini">
+                  <option value="neutral" selected>Neutral (Bypass)</option>
+                  <option value="lowpass">Lowpass (Sub Sweep)</option>
+                  <option value="highpass">Highpass (Thin Build)</option>
+                </select>
+              </div>
+              <div class="fx-slider-grid">
+                <div class="slider-row compact">
+                  <div class="slider-header">
+                    <span>Cutoff</span>
+                    <span id="val-master-filter-cutoff" class="slider-val">20,000 Hz</span>
+                  </div>
+                  <input type="range" id="slider-master-filter-cutoff" min="150" max="20000" step="50" value="20000">
+                </div>
+                <div class="slider-row compact">
+                  <div class="slider-header">
+                    <span>Resonance (Q)</span>
+                    <span id="val-master-filter-res" class="slider-val">1.0</span>
+                  </div>
+                  <input type="range" id="slider-master-filter-res" min="0.5" max="6.0" step="0.1" value="1.0">
+                </div>
+              </div>
+            </div>
+
+            <!-- Master Analog Tape Warmth & Saturation -->
+            <div class="slider-row compact">
+              <div class="slider-header">
+                <span>Analog Tape Warmth</span>
+                <span id="val-master-tape" class="slider-val">0%</span>
+              </div>
+              <input type="range" id="slider-master-tape" min="0" max="1" step="0.02" value="0.0">
+            </div>
+
+            <!-- Aux Return Buses -->
+            <div class="fx-returns-label">Aux Return Faders</div>
+            <div class="fx-returns-grid">
+              <div class="slider-row compact">
+                <div class="slider-header">
+                  <span>Reverb Return</span>
+                  <span id="val-master-reverb-return" class="slider-val">55%</span>
+                </div>
+                <input type="range" id="slider-master-reverb-return" min="0" max="1" step="0.02" value="0.55">
+              </div>
+
+              <div class="slider-row compact">
+                <div class="slider-header">
+                  <span>Delay Return</span>
+                  <span id="val-master-delay-return" class="slider-val">40%</span>
+                </div>
+                <input type="range" id="slider-master-delay-return" min="0" max="1" step="0.02" value="0.40">
+              </div>
+
+              <div class="slider-row compact">
+                <div class="slider-header">
+                  <span>Delay Feedback</span>
+                  <span id="val-master-delay-feedback" class="slider-val">45%</span>
+                </div>
+                <input type="range" id="slider-master-delay-feedback" min="0.05" max="0.88" step="0.02" value="0.45">
+              </div>
+
+              <div class="slider-row compact">
+                <div class="slider-header">
+                  <span>Stereo Chorus Return</span>
+                  <span id="val-master-chorus-return" class="slider-val">35%</span>
+                </div>
+                <input type="range" id="slider-master-chorus-return" min="0" max="1" step="0.02" value="0.35">
+              </div>
+            </div>
+
+            <!-- Master Output Volume -->
+            <div class="slider-row compact" style="margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px;">
+              <div class="slider-header">
+                <span>Master Output</span>
+                <span id="val-volume" class="slider-val">70%</span>
+              </div>
+              <input type="range" id="slider-volume" min="0" max="1" step="0.02" value="0.7">
+            </div>
+          </div>
+        </section>
+
+        <!-- Presets & State Export -->
+        <section class="control-section">
+          <div class="section-label">
+            <span>Presets & State</span>
+          </div>
+
+          <select id="select-preset">
+            <option value="" disabled selected>-- Select Sonic Preset --</option>
+            <option value="Neon Outrun">Neon Outrun (Synthwave 3D)</option>
+            <option value="Monet Sunrise">Monet Sunrise (Impressionist)</option>
+            <option value="Cathedral Light">Cathedral Light (Stained Glass)</option>
+            <option value="Matrix Terminal">Matrix Terminal (ASCII Art)</option>
+            <option value="Cosmic Void">Cosmic Void (Ambient ASCII)</option>
+          </select>
+
+          <button id="btn-randomize" class="action-btn" title="Randomize audiovisual state">
+            🎲 Randomize Parameters
+          </button>
+
+          <div class="btn-row">
+            <button id="btn-export-json" class="action-btn" title="Export state as JSON">
+              📋 Export JSON
+            </button>
+            <button id="btn-import-json" class="action-btn" title="Import state from JSON">
+              📥 Import JSON
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Footer -->
+      <div class="panel-footer">
+        <span>Zero External Assets</span>
+        <span id="live-fps-val" class="live-fps">60 FPS</span>
+      </div>
+    </aside>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
