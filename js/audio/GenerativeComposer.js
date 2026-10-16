@@ -87,6 +87,10 @@ export class GenerativeComposer {
 
     // Generative Musical Journey Concepts
     this.concepts = [
+      'blade_runner',
+      'studio_ghibli',
+      'dune_arrakis',
+      'vintage_cartoon',
       'cosmic_ambient',
       'driving_outrun',
       'glitch_cyber',
@@ -96,6 +100,17 @@ export class GenerativeComposer {
     this.currentConceptIndex = 0;
     this.barInConcept = 0;
     this.phase = 'groove'; // 'groove', 'anticipation', 'fill_drop'
+
+    this.state.on('mood:applied', (moodName) => {
+      const idx = this.concepts.indexOf(moodName);
+      if (idx !== -1) {
+        this.currentConceptIndex = idx;
+        this.barInConcept = 0;
+        this.phase = 'groove';
+        this.state.setEvolveConfig('currentConcept', moodName);
+        this.state.setEvolveConfig('nextConcept', this.getNextConcept());
+      }
+    });
 
     // Initialize all patterns from default state
     this.rebuildAllPatterns();

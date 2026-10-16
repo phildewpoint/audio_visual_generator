@@ -46,16 +46,32 @@
 
       <!-- Scrollable Body -->
       <div class="panel-body">
-        <!-- Visual Engines Switcher -->
+        <!-- World Construct & Render Style Switcher -->
         <section class="control-section">
           <div class="section-label">
-            <span>Visual Engine</span>
+            <span>World Construct</span>
+            <span style="display: flex; align-items: center; gap: 4px; font-size: 10px; text-transform: none; color: var(--text-muted);" title="Automatically pair each World Construct with its signature audio score">
+              <input type="checkbox" id="toggle-sync-construct-audio" checked style="accent-color: var(--accent-cyan); cursor: pointer;">
+              <label for="toggle-sync-construct-audio" style="cursor: pointer;">Sync Audio</label>
+            </span>
+          </div>
+          <div class="construct-switcher">
+            <button class="construct-btn active" data-construct="blade_runner" title="Neo-Noir 2049 Megacity, Tyrell Pyramids, Neon Rain & Spinner Trails">🌧️ Blade Runner</button>
+            <button class="construct-btn" data-construct="studio_ghibli" title="Pastoral Miyazaki Cumulonimbus Sky, Rolling Grass Waves & Sky Castle">🍃 Studio Ghibli</button>
+            <button class="construct-btn" data-construct="vintage_cartoon" title="1928 Rubber-Hose Steamboat, Film Grain, Bouncing Stacks & Musical Notes">🚢 1928 Cartoon</button>
+            <button class="construct-btn" data-construct="dune_arrakis" title="Arrakis Ochre Sand Dunes, Orbital Heighliner, Twin Moons & Spice Glow">🏜️ Dune: Arrakis</button>
+            <button class="construct-btn span-full" data-construct="cosmic_default" title="Original Pulsar Horizon, Aurora Ribbons & Cosmic Mountains">🌌 Cosmic Nebula (Original)</button>
+          </div>
+
+          <div class="section-label" style="margin-top: 6px;">
+            <span>Render Style / Filter</span>
           </div>
           <div class="engine-switcher">
-            <button class="engine-btn" data-engine="ascii">ASCII Art</button>
-            <button class="engine-btn" data-engine="impressionist">Impressionist</button>
-            <button class="engine-btn" data-engine="stained_glass">Stained Glass</button>
-            <button class="engine-btn active" data-engine="synthwave">Synthwave 3D</button>
+            <button class="engine-btn active span-full" data-engine="construct">🎬 Native Construct (High-Res)</button>
+            <button class="engine-btn" data-engine="ascii">📟 ASCII Art</button>
+            <button class="engine-btn" data-engine="impressionist">🎨 Impressionist</button>
+            <button class="engine-btn" data-engine="stained_glass">💠 Stained Glass</button>
+            <button class="engine-btn" data-engine="synthwave">📐 3D Wireframe</button>
           </div>
         </section>
 
@@ -184,9 +200,13 @@
             <span>Instant Mood Shifts</span>
           </div>
           <div class="mood-macro-grid">
+            <button class="mood-badge active" data-mood="blade_runner" title="Vangelis CS-80 Brass Swells, Dorian Scale, Lush Reverb">🌧️ 2049</button>
+            <button class="mood-badge" data-mood="studio_ghibli" title="Hisaishi Pastoral Chimes, Pentatonic Ethereal, Warm Triads">🍃 Ghibli</button>
+            <button class="mood-badge" data-mood="vintage_cartoon" title="1928 Steamboat Bounce, Ragtime Call & Response, Square/Tri Lead">🚢 1928</button>
+            <button class="mood-badge" data-mood="dune_arrakis" title="Arrakis Seismic Thumper, Mystic Insen Scale, Sub Drone">🏜️ Dune</button>
             <button class="mood-badge" data-mood="cosmic_ambient" title="Space Ambient (Ambient Pulse, Drone, Swells, Chimes)">🌌 Cosmic</button>
             <button class="mood-badge" data-mood="driving_outrun" title="Outrun / Synthwave (4-on-Floor, Rolling 16th, Stabs, Arp)">🏎️ Outrun</button>
-            <button class="mood-badge" data-mood="cinematic_tension" title="Film Score (Halftime, Sub Drone, Wide Swell, Slow Glide)">🎬 Cinematic</button>
+            <button class="mood-badge" data-mood="cinematic_tension" title="Film Score (Halftime, Sub Drone, Wide Swell, Slow Glide)">🎬 Cinema</button>
             <button class="mood-badge" data-mood="zen_meditation" title="Meditation (Heartbeat, Drone, Infinite Pad, Serene Chimes)">🧘 Zen</button>
             <button class="mood-badge" data-mood="glitch_cyber" title="Cyberpunk IDM (Glitch Drums, Acid Walk, Insen Scale)">⚡ Cyber</button>
           </div>
@@ -647,12 +667,16 @@
           </div>
 
           <select id="select-preset">
-            <option value="" disabled selected>-- Select Sonic Preset --</option>
-            <option value="Neon Outrun">Neon Outrun (Synthwave 3D)</option>
-            <option value="Monet Sunrise">Monet Sunrise (Impressionist)</option>
-            <option value="Cathedral Light">Cathedral Light (Stained Glass)</option>
-            <option value="Matrix Terminal">Matrix Terminal (ASCII Art)</option>
-            <option value="Cosmic Void">Cosmic Void (Ambient ASCII)</option>
+            <option value="" disabled selected>-- Select Audiovisual Preset --</option>
+            <option value="Blade Runner 2049">🌧️ Blade Runner 2049 (Neo-Noir Construct)</option>
+            <option value="Spirited Ghibli Meadow">🍃 Spirited Ghibli Meadow (Pastoral Construct)</option>
+            <option value="Steamboat 1928">🚢 Steamboat 1928 (Rubber-Hose Construct)</option>
+            <option value="Dune: Arrakis Spice">🏜️ Dune: Arrakis Spice (Desert Construct)</option>
+            <option value="Neon Outrun">📐 Neon Outrun (Synthwave 3D)</option>
+            <option value="Monet Sunrise">🎨 Monet Sunrise (Impressionist)</option>
+            <option value="Cathedral Light">💠 Cathedral Light (Stained Glass)</option>
+            <option value="Matrix Terminal">📟 Matrix Terminal (ASCII Art)</option>
+            <option value="Cosmic Void">🌌 Cosmic Void (Ambient ASCII)</option>
           </select>
 
           <button id="btn-randomize" class="action-btn" title="Randomize audiovisual state">

@@ -273,15 +273,17 @@ html, body {
   justify-content: space-between;
 }
 
-/* Visual Engine Switcher Grid */
+/* World Construct Switcher & Visual Engine Switcher Grid */
+.construct-switcher,
 .engine-switcher {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
 }
 
+.construct-btn,
 .engine-btn {
-  padding: 10px 8px;
+  padding: 9px 8px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
@@ -293,10 +295,23 @@ html, body {
   transition: all 0.2s ease;
 }
 
+.construct-btn.span-full,
+.engine-btn.span-full {
+  grid-column: 1 / -1;
+}
+
+.construct-btn:hover,
 .engine-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: var(--text-main);
   border-color: rgba(255, 255, 255, 0.2);
+}
+
+.construct-btn.active {
+  background: linear-gradient(135deg, rgba(255, 136, 0, 0.22), rgba(0, 243, 255, 0.22));
+  border-color: #ff9e00;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(255, 158, 0, 0.35);
 }
 
 .engine-btn.active {

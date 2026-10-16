@@ -29,7 +29,9 @@ export class GUI {
   }
 
   _initElements() {
-    // Engine buttons
+    // Construct & Engine buttons
+    this.constructBtns = document.querySelectorAll('.construct-btn');
+    this.syncConstructAudioToggle = document.getElementById('toggle-sync-construct-audio');
     this.engineBtns = document.querySelectorAll('.engine-btn');
 
     // Visual sliders
@@ -123,7 +125,20 @@ export class GUI {
   }
 
   _bindEvents() {
-    // 1. Style Switcher
+    // 1. World Construct Switcher & Style Switcher
+    this.constructBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const construct = btn.dataset.construct;
+        this.state.setConstruct(construct);
+        this.showToast(`World Construct: ${btn.textContent.trim()}`);
+      });
+    });
+
+    this.syncConstructAudioToggle?.addEventListener('change', (e) => {
+      this.state.setVisual('syncAudioToConstruct', e.target.checked);
+      this.showToast(`Sync Audio to World: ${e.target.checked ? 'ON' : 'OFF'}`);
+    });
+
     this.engineBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const engine = btn.dataset.engine;
@@ -513,6 +528,12 @@ export class GUI {
     });
 
     // 12. State change subscriptions
+    this.state.on('change:construct', (construct) => {
+      this.constructBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.construct === construct);
+      });
+    });
+
     this.state.on('change:engine', (engine) => {
       this.engineBtns.forEach(btn => {
         btn.classList.toggle('active', btn.dataset.engine === engine);
@@ -570,7 +591,14 @@ export class GUI {
     const v = this.state.visual;
     const a = this.state.audio;
 
-    // Active Engine
+    // Active Construct & Engine
+    this.constructBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.construct === (v.construct || 'blade_runner'));
+    });
+    if (this.syncConstructAudioToggle && v.syncAudioToConstruct !== undefined) {
+      this.syncConstructAudioToggle.checked = !!v.syncAudioToConstruct;
+    }
+
     this.engineBtns.forEach(btn => {
       btn.classList.toggle('active', btn.dataset.engine === v.engine);
     });
@@ -820,6 +848,10 @@ export class GUI {
     // 0. Update Generative Journey Tracker HUD
     if (audioData && audioData.journey) {
       const conceptNames = {
+        blade_runner: '🌧️ Blade Runner 2049',
+        studio_ghibli: '🍃 Studio Ghibli',
+        vintage_cartoon: '🚢 1928 Steamboat',
+        dune_arrakis: '🏜️ Dune: Arrakis',
         cosmic_ambient: '🌌 Cosmic Ambient',
         driving_outrun: '🏎️ Driving Outrun',
         glitch_cyber: '⚡ Glitch Cyber',

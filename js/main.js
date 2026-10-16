@@ -3,6 +3,7 @@ import { CoreScene } from './core/CoreScene.js';
 import { AudioEngine } from './audio/AudioEngine.js';
 import { GUI } from './gui/GUI.js';
 
+import { ConstructEngine } from './engines/ConstructEngine.js';
 import { AsciiEngine } from './engines/AsciiEngine.js';
 import { ImpressionistEngine } from './engines/ImpressionistEngine.js';
 import { StainedGlassEngine } from './engines/StainedGlassEngine.js';
@@ -20,6 +21,7 @@ class Application {
     this.gui = new GUI(this.state, this.audio);
 
     this.engineClasses = {
+      construct: ConstructEngine,
       ascii: AsciiEngine,
       impressionist: ImpressionistEngine,
       stained_glass: StainedGlassEngine,
@@ -92,7 +94,7 @@ class Application {
       this.currentEngine = null;
     }
 
-    const EngineClass = this.engineClasses[engineName] || this.engineClasses.synthwave;
+    const EngineClass = this.engineClasses[engineName] || this.engineClasses.construct;
     this.currentEngine = new EngineClass(this.canvas, this.coreScene, this.state);
     this.currentEngine.init();
     this.currentEngine.resize(this.canvas.width, this.canvas.height);

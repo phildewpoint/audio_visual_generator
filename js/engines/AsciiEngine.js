@@ -447,7 +447,8 @@ export class AsciiEngine extends BaseEngine {
     }
 
     const asciiOpts = this.state.visual?.ascii || {};
-    const colorMode = asciiOpts.colorMode || 'neon';
+    const isMatrixPreset = this.state.visual?.paletteName === 'matrix';
+    const colorMode = isMatrixPreset ? 'matrix' : (asciiOpts.colorMode === 'matrix' ? 'matrix' : 'fullcolor');
     const crtEffect = asciiOpts.crtEffect !== false;
     const paletteShift = this.state.visual?.paletteShift || 0;
     const ramp = this._getRamp();

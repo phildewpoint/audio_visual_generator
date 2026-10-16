@@ -88,35 +88,58 @@ export class SynthwaveEngine extends BaseEngine {
     const chaos = this.state.visual.chaos || 1.0;
     const paletteShift = this.state.visual.paletteShift || 0;
     const density = this.state.visual.density || 1.0;
+    const construct = this.state.visual.construct || 'cosmic_default';
 
     const bass = audioData.bass || 0;
     const mid = audioData.mid || 0;
     const treble = audioData.treble || 0;
     const beat = audioData.beat || false;
 
-    // Palette Colors
-    const primaryHue = (310 + paletteShift) % 360; // Neon Magenta/Pink
-    const secondaryHue = (185 + paletteShift) % 360; // Neon Cyan
-    const accentHue = (45 + paletteShift) % 360; // Amber/Sun Gold
+    // Construct-Aware Palette Colors
+    let primaryHue = (310 + paletteShift) % 360;
+    let secondaryHue = (185 + paletteShift) % 360;
+    let accentHue = (45 + paletteShift) % 360;
 
-    // Clear background: Retro Outrun Twilight Sky Gradient
+    if (construct === 'blade_runner') {
+      primaryHue = (28 + paletteShift) % 360;    // Sodium Amber
+      secondaryHue = (188 + paletteShift) % 360; // Neon Cyan
+      accentHue = (348 + paletteShift) % 360;    // Beacon Crimson
+    } else if (construct === 'studio_ghibli') {
+      primaryHue = (128 + paletteShift) % 360;   // Meadow Emerald
+      secondaryHue = (202 + paletteShift) % 360; // Cerulean Sky
+      accentHue = (48 + paletteShift) % 360;     // Sunlit Cream Gold
+    } else if (construct === 'vintage_cartoon') {
+      primaryHue = (38 + paletteShift) % 360;    // Vintage Sepia
+      secondaryHue = (42 + paletteShift) % 360;
+      accentHue = (35 + paletteShift) % 360;
+    } else if (construct === 'dune_arrakis') {
+      primaryHue = (26 + paletteShift) % 360;    // Arrakis Ochre
+      secondaryHue = (195 + paletteShift) % 360; // Spice Ibad Blue
+      accentHue = (42 + paletteShift) % 360;     // Desert Sun
+    }
+
+    // Clear background: Construct-tuned Twilight Sky Gradient
     const horizonY = h * this.horizonRatio;
     const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
     skyGrad.addColorStop(0, '#04020a');
-    skyGrad.addColorStop(0.55, `hsl(${primaryHue}, 90%, 8%)`);
-    skyGrad.addColorStop(0.85, `hsl(${(primaryHue + 30) % 360}, 95%, 16%)`);
-    skyGrad.addColorStop(1, `hsl(${secondaryHue}, 90%, 26%)`);
+    skyGrad.addColorStop(0.55, `hsl(${primaryHue}, 80%, 8%)`);
+    skyGrad.addColorStop(0.85, `hsl(${(primaryHue + 20) % 360}, 85%, 15%)`);
+    skyGrad.addColorStop(1, `hsl(${secondaryHue}, 85%, 24%)`);
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, w, horizonY + 2);
 
     // 1. Distant Twinkling Retro Starfield
     this._renderStarfield(ctx, w, horizonY, time, treble);
 
-    // 2. Segmented Neon Synthwave Sun
-    this._renderSynthwaveSun(ctx, w, horizonY, time, bass, beat, primaryHue, accentHue);
+    // 2. Construct-Aware Horizon Hero (Sun or Construct 3D Wireframe Structure)
+    if (construct === 'cosmic_default') {
+      this._renderSynthwaveSun(ctx, w, horizonY, time, bass, beat, primaryHue, accentHue);
+    } else {
+      this._renderConstructWireframeHero(ctx, w, h, horizonY, time, bass, mid, treble, beat, construct, primaryHue, secondaryHue, accentHue);
+    }
 
     // 3. Audio-Reactive 3D Wireframe Mountains (Flanks)
-    this._renderMountainWireframes(ctx, w, h, horizonY, time, chaos, bass, mid, secondaryHue);
+    this._renderMountainWireframes(ctx, w, h, horizonY, time, chaos, bass, mid, secondaryHue, construct);
 
     // 4. Infinite Perspective Rolling Neon Grid
     this.gridOffset = (this.gridOffset + deltaTime * 140 * speed * (this.state.visual.synthwave.gridSpeed || 1.2)) % 60;
@@ -132,6 +155,93 @@ export class SynthwaveEngine extends BaseEngine {
     if (this.state.visual.synthwave.crtScanlines) {
       this._renderInternalCRT(ctx, w, h, time, beat);
     }
+  }
+
+  _renderConstructWireframeHero(ctx, w, h, horizonY, time, bass, mid, treble, beat, construct, primaryHue, secondaryHue, accentHue) {
+    ctx.save();
+    const cx = w * 0.5;
+
+    if (construct === 'blade_runner') {
+      // 3D Wireframe Tyrell Megastructure Pyramid
+      const pyrW = w * 0.36;
+      const topW = w * 0.09;
+      const pyrH = horizonY * (0.68 + bass * 0.08);
+      const topY = horizonY - pyrH;
+
+      ctx.strokeStyle = `hsla(${primaryHue}, 100%, 65%, 0.85)`;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(cx - pyrW * 0.5, horizonY);
+      ctx.lineTo(cx - topW * 0.5, topY);
+      ctx.lineTo(cx + topW * 0.5, topY);
+      ctx.lineTo(cx + pyrW * 0.5, horizonY);
+      ctx.moveTo(cx, topY);
+      ctx.lineTo(cx, horizonY);
+      ctx.stroke();
+
+      // Horizontal wireframe tiers
+      ctx.strokeStyle = `hsla(${secondaryHue}, 100%, 65%, 0.45)`;
+      ctx.lineWidth = 1.1;
+      for (let i = 1; i < 10; i++) {
+        const f = i / 10;
+        const y = topY + f * pyrH;
+        const hw = (topW + f * (pyrW - topW)) * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(cx - hw, y);
+        ctx.lineTo(cx + hw, y);
+        ctx.stroke();
+      }
+    } else if (construct === 'dune_arrakis') {
+      // 3D Wireframe Descending Orbital Monolith & Twin Wireframe Moons
+      const monoW = w * 0.12;
+      const monoH = horizonY * 0.62;
+      const monoY = horizonY * 0.48 + Math.sin(time) * 8;
+
+      ctx.strokeStyle = `hsla(${primaryHue}, 100%, 65%, 0.85)`;
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(cx - monoW * 0.5, monoY - monoH * 0.5, monoW, monoH);
+
+      // Glowing Spice-Blue Core Axis
+      ctx.strokeStyle = `hsla(${secondaryHue}, 100%, 70%, ${0.65 + bass * 0.35})`;
+      ctx.beginPath();
+      ctx.moveTo(cx, monoY - monoH * 0.45);
+      ctx.lineTo(cx, monoY + monoH * 0.45);
+      ctx.stroke();
+
+      // Twin Wireframe Moons
+      ctx.strokeStyle = `hsla(${accentHue}, 95%, 70%, 0.7)`;
+      ctx.beginPath();
+      ctx.arc(w * 0.76, horizonY * 0.35, horizonY * 0.13, 0, Math.PI * 2);
+      ctx.arc(w * 0.85, horizonY * 0.52, horizonY * 0.06, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (construct === 'studio_ghibli') {
+      // 3D Wireframe Floating Sky-Castle Dome
+      const cy = horizonY * 0.48 + Math.sin(time * 1.5) * 10;
+      const r = horizonY * 0.22;
+      ctx.strokeStyle = `hsla(${primaryHue}, 95%, 68%, 0.85)`;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, Math.PI, 0);
+      ctx.moveTo(cx - r, cy);
+      ctx.lineTo(cx + r, cy);
+      ctx.lineTo(cx + r * 0.45, cy + r * 0.65);
+      ctx.lineTo(cx - r * 0.45, cy + r * 0.65);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (construct === 'vintage_cartoon') {
+      // 3D Wireframe Bouncing Steamboat Silhouette
+      const bounce = Math.sin(time * 8.5) * (0.15 + bass * 0.2);
+      ctx.translate(cx, horizonY);
+      ctx.scale(1 - bounce * 0.2, 1 + bounce * 0.25);
+      ctx.strokeStyle = `hsla(${primaryHue}, 85%, 78%, 0.9)`;
+      ctx.lineWidth = 2.0;
+      ctx.strokeRect(-90, -45, 180, 45);
+      ctx.strokeRect(-45, -95, 22, 50);
+      ctx.strokeRect(-10, -82, 20, 37);
+      ctx.strokeRect(22, -70, 18, 25);
+    }
+
+    ctx.restore();
   }
 
   _renderStarfield(ctx, w, horizonY, time, treble) {
@@ -200,7 +310,7 @@ export class SynthwaveEngine extends BaseEngine {
     ctx.restore();
   }
 
-  _renderMountainWireframes(ctx, w, h, horizonY, time, chaos, bass, mid, secondaryHue) {
+  _renderMountainWireframes(ctx, w, h, horizonY, time, chaos, bass, mid, secondaryHue, construct = 'cosmic_default') {
     ctx.save();
     const mountainLayers = 2;
     for (let layer = 0; layer < mountainLayers; layer++) {
@@ -212,7 +322,7 @@ export class SynthwaveEngine extends BaseEngine {
       // Left Flank
       for (let x = 0; x <= flankCutoff; x += stepX) {
         const distFromCenter = (flankCutoff - x) / flankCutoff;
-        const elev = this.coreScene.getElevation(x - w * 0.5, zDist, time * 0.5, chaos, bass);
+        const elev = this.coreScene.getElevation(x - w * 0.5, zDist, time * 0.5, chaos, bass, construct);
         const y = horizonY - Math.abs(elev) * 110 * distFromCenter * (1.0 + bass * 0.5);
         if (x === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
@@ -231,7 +341,7 @@ export class SynthwaveEngine extends BaseEngine {
       ctx.beginPath();
       for (let x = w - flankCutoff; x <= w; x += stepX) {
         const distFromCenter = (x - (w - flankCutoff)) / flankCutoff;
-        const elev = this.coreScene.getElevation(x - w * 0.5, zDist, time * 0.5, chaos, bass);
+        const elev = this.coreScene.getElevation(x - w * 0.5, zDist, time * 0.5, chaos, bass, construct);
         const y = horizonY - Math.abs(elev) * 110 * distFromCenter * (1.0 + bass * 0.5);
         if (x === w - flankCutoff) ctx.moveTo(x, horizonY);
         else ctx.lineTo(x, y);
