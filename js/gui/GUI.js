@@ -511,11 +511,26 @@ export class GUI {
       }
     });
 
-    this.collapseBtn?.addEventListener('click', () => {
-      this.container.classList.toggle('collapsed');
-      const icon = this.collapseBtn.querySelector('span');
+    const toggleCollapse = () => {
+      const isCollapsed = this.container.classList.toggle('collapsed');
+      const icon = this.collapseBtn?.querySelector('span');
       if (icon) {
-        icon.textContent = this.container.classList.contains('collapsed') ? '◧' : '◨';
+        icon.textContent = isCollapsed ? '◨' : '◧';
+      }
+      if (this.collapseBtn) {
+        this.collapseBtn.title = isCollapsed ? 'Expand Panel' : 'Collapse Panel';
+      }
+    };
+
+    this.collapseBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCollapse();
+    });
+
+    const panelHeader = this.container?.querySelector('.panel-header');
+    panelHeader?.addEventListener('click', (e) => {
+      if (this.container.classList.contains('collapsed') && !e.target.closest('#btn-fullscreen')) {
+        toggleCollapse();
       }
     });
 
